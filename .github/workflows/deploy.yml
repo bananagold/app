@@ -39,3 +39,4 @@ jobs:
         resourceGroup: bananagold-rg
         containerAppEnvironment: bananagold-env
         targetPort: 80
+
