@@ -31,3 +31,4 @@ jobs:
         imageToBuild: bananagoldacr.azurecr.io/bananagold:githublatest
         dockerfilePath: ./Dockerfile
         targetPort: 443
+
