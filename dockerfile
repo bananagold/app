@@ -11,7 +11,7 @@ COPY certificates/ ./certificates/
 RUN pip install flask
 
 # Expose HTTPS port
-EXPOSE 443
+EXPOSE 80
 
 # Run app
 CMD ["python", "fixssl.py"]
