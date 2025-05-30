@@ -25,7 +25,8 @@ jobs:
     - name: Deploy image to Azure Container Apps
       uses: azure/container-apps-deploy-action@v1
       with:
-        imageToDeploy: bananagoldacr.azurecr.io/bananagold:githublatest  # ✅ use your built image here
+        imageToDeploy: bananagoldacr.azurecr.io/bananagold:latest
+
         containerAppName: bananagold
         resourceGroup: bananagold-rg
         containerAppEnvironment: bananagold-env
