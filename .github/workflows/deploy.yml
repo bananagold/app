@@ -2,41 +2,41 @@ name: Build and Deploy to Azure Container App
 
 on:
   push:
-    branches:
-      - main
-
-permissions:
-  id-token: write
-  contents: read
+    branches: [main]
 
 jobs:
   deploy-to-azure:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Azure Login
+      - name: Log in to Azure
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      
-      - name: Build and push image to Azure Container Registry
-        run: |
-          az acr build \
-            --registry bananagoldacr \
-            --image bananagoldapp:${{ github.sha }} \
-            --file ./dockerfile \
-            .
 
+      - name: Log in to ACR
+        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login bananagoldacr.azurecr.io --username ${{ secrets.ACR_USERNAME }} --password-stdin
 
-      - name: Deploy to Azure Container App
+      - name: Build Docker image
+        run: docker build -t bananagoldacr.azurecr.io/bananagold:latest -f ./dockerfile .
+
+      - name: Push Docker image
+        run: docker push bananagoldacr.azurecr.io/bananagold:latest
+
+      - name: Deploy to Azure Container Apps
         uses: azure/container-apps-deploy-action@v1
         with:
-          registryUrl: bananagoldacr.azurecr.io
-          imageToDeploy: bananagoldacr.azurecr.io/bananagoldapp:${{ github.sha }}
+          acrName: bananagoldacr
           containerAppName: bananagold
           resourceGroup: bananagold-rg
+          containerAppEnvironment: bananagold-env
+          imageToDeploy: bananagoldacr.azurecr.io/bananagold:latest
+          targetPort: 443
