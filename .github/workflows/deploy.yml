@@ -22,11 +22,19 @@ jobs:
         tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Deploy image to Azure Container Apps
+    - name: Log in to ACR
+      run: az acr login --name bananagoldacr
+
+    - name: Build Docker image
+      run: docker build -t bananagoldacr.azurecr.io/bananagold:latest .
+
+    - name: Push Docker image to ACR
+      run: docker push bananagoldacr.azurecr.io/bananagold:latest
+
+    - name: Deploy image to Azure Container App
       uses: azure/container-apps-deploy-action@v1
       with:
         imageToDeploy: bananagoldacr.azurecr.io/bananagold:latest
-
         containerAppName: bananagold
         resourceGroup: bananagold-rg
         containerAppEnvironment: bananagold-env
