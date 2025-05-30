@@ -26,10 +26,10 @@ jobs:
 
     - name: Build and push image to ACR
       run: |
-        az acr build \
-          --registry bananagoldacr \
+        az acr build --registry bananagoldacr \
           --image bananagoldapp:${{ github.sha }} \
-          ./dockerfile
+          --file dockerfile/Dockerfile \
+          dockerfile
 
     - name: Deploy to Azure Container Apps
       uses: azure/container-apps-deploy-action@v1
