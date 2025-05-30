@@ -1,37 +1,38 @@
-name: build-and-deploy
+name: deploy-to-azure
 
 on:
   push:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  deploy-to-azure:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Azure Login (OIDC)
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    - name: Azure Login via OIDC
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Build and Push Docker image
-        run: |
-          docker build -t bananagoldacr.azurecr.io/bananagold:githublatest .
-          docker push bananagoldacr.azurecr.io/bananagold:githublatest
+    - name: Build and push image to ACR
+      run: |
+        az acr build --registry bananagoldacr \
+          --image bananagoldapp:${{ github.sha }} \
+          .
 
-      - name: Deploy to Azure Container App
-        uses: azure/container-apps-deploy-action@v1
-        with:
-          resourceGroup: bananagold-rg
-          containerAppName: bananagold
-          imageToDeploy: bananagoldacr.azurecr.io/bananagold:githublatest
+    - name: Deploy to Azure Container Apps
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        containerAppName: bananagold
+        resourceGroup: bananagold-rg
+        imageToDeploy: bananagoldacr.azurecr.io/bananagoldapp:${{ github.sha }}
