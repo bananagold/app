@@ -1,4 +1,4 @@
-name: Deploy to Azure Container App
+name: Build and Deploy to Azure Container App
 
 on:
   push:
@@ -12,29 +12,21 @@ jobs:
       contents: read
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Log in to Azure
-      uses: azure/login@v1
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Build and push container to ACR
-      uses: azure/acr-build@v1
-      with:
-        registry: bananagoldacr.azurecr.io
-        repository: bananagold
-        image: latest
-        dockerfile: ./Dockerfile
-
-    - name: Deploy to Container App
-      uses: azure/container-apps-deploy-action@v1
-      with:
-        imageToDeploy: bananagoldacr.azurecr.io/bananagold:latest
-        containerAppName: bananagold
-        resourceGroup: bananagold-rg
-        containerAppEnvironment: bananagold-env
-        targetPort: 80
+      - name: Deploy to Azure Container Apps
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          containerAppName: bananagold
+          resourceGroup: bananagold-rg
+          containerAppEnvironment: bananagold-env
+          imageToDeploy: bananagoldacr.azurecr.io/bananagold:latest
+          targetPort: 80
